@@ -1,5 +1,5 @@
 {
-  "name": "batch-entity-multiplicator",
+  "name": "ldap-schema-validator",
   "version": "0.1.0",
   "build": "dev-local",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "deploy": "ng deploy --repo=https://github.com/kubamiszcz/BatchEntityMultiplicator.git --name='kubamiszcz' --email=zielonyeufor@gmail.com --no-silent"
+    "deploy": "ng deploy --repo=https://github.com/kubamiszcz/LDAPSchemaValidator.git --name='kubamiszcz' --email=zielonyeufor@gmail.com --no-silent"
   },
   "private": true,
   "dependencies": {

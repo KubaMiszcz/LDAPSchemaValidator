@@ -14,16 +14,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'BatchEntityMultiplicator'`, () => {
+  it(`should have as title 'LDAPSchemaValidator'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('BatchEntityMultiplicator');
+    expect(app.title).toEqual('LDAPSchemaValidator');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('BatchEntityMultiplicator app is running!');
+    expect(compiled.querySelector('.content span')?.textContent).toContain('LDAPSchemaValidator app is running!');
   });
 });

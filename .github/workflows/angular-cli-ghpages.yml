@@ -11,7 +11,7 @@ jobs:
 
     # defaults:
     #   run:
-    #     working-directory: batch-entity-multiplicator
+    #     working-directory: ldap-schema-validator
 
     steps:
     - name: Checkout
@@ -33,5 +33,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         npm install
-        npm run ng -- deploy --base-href=/BatchEntityMultiplicator/ --name="KubaMiszcz" --email="zielonyeufor@gmail.com" --no-silent
+        npm run ng -- deploy --base-href=/LDAPSchemaValidator/ --name="KubaMiszcz" --email="zielonyeufor@gmail.com" --no-silent
         echo "[SUCCESS] build:" && jq -r '.build' package.json

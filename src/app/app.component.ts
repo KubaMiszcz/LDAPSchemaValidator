@@ -7,7 +7,7 @@ import { AppService } from './services/app.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'Batch Entity Multiplicator';
+  title = 'LDAP Schema Validator';
   isDevelopmentMode = this.appService.build.startsWith('dev');
 
   constructor(private appService: AppService){
