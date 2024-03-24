@@ -1,0 +1,158 @@
+/* You can add global styles to this file, and also import other style files */
+// @media only screen and (max-width: 365px) {
+//     .content {
+//         width: 100%;
+//     }
+// }
+
+
+
+html,
+body,
+form,
+fieldset,
+table,
+tr,
+td,
+img {
+    // font: 100%/150% calibri,helvetica,sans-serif;
+    font-family: 'Dosis-Medium', sans-serif;
+}
+
+// BOOTSTRAP OVERRIDES
+.btn {
+    margin: 2px;
+    padding: 2px;
+    box-shadow: 4px 4px 6px 1px rgb(75, 75, 75);
+}
+
+.card {
+    border-color: rgb(75, 75, 75);
+    box-shadow: 4px 4px 6px 1px rgb(75, 75, 75);
+}
+
+.no-box-shadow {
+    box-shadow: none;
+}
+
+.input-group,
+.input-group-text,
+.form-control {
+    border-color: rgb(75, 75, 75);
+    padding: 2px;
+
+    input::placeholder {
+        color: rgb(164, 164, 164);
+        // opacity: 1;
+        /* Firefox */
+    }
+
+    input::-ms-input-placeholder {
+        /* Edge 12 -18 */
+        color: rgb(164, 164, 164);
+    }
+}
+
+.input-group-text {
+    background-color: #e9e9e9;
+    box-shadow: 4px 4px 6px 1px rgb(75, 75, 75);
+}
+
+.form-control {
+    box-shadow: 4px 4px 6px 1px rgb(75, 75, 75);
+}
+
+select {
+    border-color: red;
+}
+
+.btn-danger {
+    background-color: #da0000b8;
+}
+
+.dropdown-toggle {
+    color: black;
+}
+
+.form-label {
+    margin-bottom: 0px;
+}
+
+.invalid-input {
+    color: red;
+}
+
+.valid-input {
+    color: green;
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+    background-color: lightcyan;
+    padding: 0.5em;
+
+    .btn-close {
+        margin-right: 0.25em;
+    }
+}
+
+.card-header,
+.card-body,
+.card-footer {
+    padding: 0.25em;
+}
+
+.w-90 {
+    width: 90%;
+}
+
+.w-80 {
+    width: 80%;
+}
+
+.w-10 {
+    width: 10%;
+}
+
+.w-20 {
+    width: 20%;
+}
+
+.w-33 {
+    width: 33%;
+}
+
+.w-2em {
+    width: 2em;
+    min-width: 2em;
+    max-width: 2em;
+}
+
+.w-3em {
+    width: 3em;
+    min-width: 3em;
+    max-width: 3em;
+}
+
+.w-4em {
+    width: 4em;
+    min-width: 4em;
+    max-width: 4em;
+}
+
+
+
+@font-face {
+    font-family: 'JetBrainsMono-Medium';
+    // src: url('./assets/fonts/JetBrainsMono-Medium.ttf');
+}
+
+@font-face {
+    font-family: 'Dosis-Medium';
+    // src: url('./assets/fonts/Dosis-Medium.ttf');
+}
+
+.font-monospace {
+    // font-family: 'JetBrainsMono-Medium', monospace;
+}

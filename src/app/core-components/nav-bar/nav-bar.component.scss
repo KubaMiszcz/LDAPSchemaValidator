@@ -1,0 +1,15 @@
+.nav-link {
+    color: bisque;
+    text-align: end;
+}
+
+.dropdown-toggle::after {
+    margin-top: .5em;
+    border-top: .6em solid;
+    border-right: .6em solid transparent;
+    border-left: .6em solid transparent;
+}
+
+.hidden{
+    display: none;
+}
