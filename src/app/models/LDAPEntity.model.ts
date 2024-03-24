@@ -8,16 +8,16 @@ export interface ILDAPEntity {
   description?: string;
   gidnumber?: string;
   homedirectory?: string;
-  member?: string[];
-  memberuid?: string[];
   o?: string;
-  objectclass?: string[];
   ou?: string;
   sn?: string;
   uid?: string;
   uidnumber?: string;
   userpassword?: string;
   version?: string;
+  member?: string[];
+  memberuid?: string[];
+  objectclass?: string[];
 
   type: ENTITY_TYPES;
   content?: string;
