@@ -1,4 +1,4 @@
-export enum ENTITY_TYPES {
+export enum ENTRY_TYPES {
   NONE = 'NONE',
   OTHER = 'OTHER',
   GROUP = 'GROUP',

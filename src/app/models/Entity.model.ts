@@ -1,8 +1,8 @@
 import { ILDAPEntry } from './LDAPEntity.model';
-import { ENTITY_TYPES } from './LDAPTypes.enum';
+import { ENTRY_TYPES } from './LDAPEntryTypes.enum';
 
 export interface IEntity {
   ldapEntry:ILDAPEntry
   errors?: string[];
-  type: ENTITY_TYPES;
+  entryType: ENTRY_TYPES;
 }

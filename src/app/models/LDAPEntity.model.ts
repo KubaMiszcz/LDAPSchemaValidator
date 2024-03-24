@@ -1,4 +1,4 @@
-import { ENTITY_TYPES } from './LDAPTypes.enum';
+import { ENTRY_TYPES } from './LDAPEntryTypes.enum';
 
 export interface ILDAPEntry {
   dn: string;
@@ -19,7 +19,7 @@ export interface ILDAPEntry {
   objectclass?: string[];
 
   //extract outside
-  type: ENTITY_TYPES;
+  typeDEPR?: ENTRY_TYPES;
   content?: string;
   errors?: string[];
 }
