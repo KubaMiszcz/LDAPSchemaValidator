@@ -24,12 +24,13 @@ export class HomePageComponent implements OnInit {
 
   ngOnInit(): void {
     this.appService.analyzeSchema();
-    this.validationResults = this.appService.validationResults;
+    this.validationResults = this.appService.validationReport;
   }
 
   analyzeSchema() {
+    this.appService.ldifSchemaRawInput = this.ldifSchemaRawInput;
     this.appService.analyzeSchema();
-    this.validationResults = this.appService.validationResults;
+    this.validationResults = this.appService.validationReport;
   }
 
   //////////////////////////////////

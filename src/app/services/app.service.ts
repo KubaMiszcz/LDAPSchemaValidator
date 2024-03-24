@@ -12,10 +12,8 @@ import { ENTRY_TYPES } from '../models/LDAPEntryTypes.enum';
 })
 export class AppService {
   ldifSchemaRawInput = EXAMPLE_LDIF_SCHEMA;
-  validationResults = '';
-  // entriesDEPR: ILDAPEntry[] = [];
+  validationReport = '';
   entities: IEntity[] = [];
-  allDNs: string[] = [];
   allEntriesOnly: ILDAPEntry[] = [];
 
   version: string = packageJson.version;
@@ -26,9 +24,7 @@ export class AppService {
     private ldapService: LDAPService
   ) {}
 
-  analyzeSchema(): string {
-    let result = '';
-
+  analyzeSchema() {
     this.ldifSchemaRawInput = this.validationService.validateRawInput(
       this.ldifSchemaRawInput
     );
@@ -36,7 +32,6 @@ export class AppService {
     this.entities = this.importEntities(this.ldifSchemaRawInput);
 
     // this.extractEntitiesKEYSVALUESDEPR();
-    this.allDNs = this.entities.map((e) => e.ldapEntry.dn);
     this.allEntriesOnly = this.entities.map((e) => e.ldapEntry);
 
     // let test = this.entities.filter((e) => !e.cn);
@@ -45,8 +40,10 @@ export class AppService {
     // this.validationResults = this.createSummary(this.entities);
     this.validateSchema(this.entities);
 
-    return result;
+    this.generateReport();
   }
+
+
 
   validateSchema(entities: IEntity[]) {
     this.entities.forEach((entity) => {
@@ -54,10 +51,12 @@ export class AppService {
 
       switch (entity.entryType) {
         case ENTRY_TYPES.USER:
-          this.validationService.checkForDuplicated_dn(
-            entity.ldapEntry,
-            this.allEntriesOnly,
-            'dn'
+          errors.push(
+            this.validationService.checkForDuplicatedEntriesByPropName(
+              entity.ldapEntry,
+              this.allEntriesOnly,
+              'dn'
+            )
           );
           // this.validationService.checkForDuplicated_uid(entity, this.allDNs)
           // this.validationService.checkForDuplicated_uidnumber(entity, this.allDNs)
@@ -104,6 +103,20 @@ export class AppService {
     });
 
     return entities;
+  }
+
+  generateReport() {
+    this.validationReport = '';
+    let msg = '';
+    this.entities.forEach((e) => {
+      if (e.errors?.length) {
+        msg = `ERR: for dn:\n${e.ldapEntry.dn}\n`;
+        e.errors.forEach((err) => (msg += err));
+        msg += `\n`;
+      }
+
+      this.validationReport += msg+'\n';
+    });
   }
 
   ////////////////////////////////////////////////////////////////
@@ -158,21 +171,20 @@ export class AppService {
   }
 
   checkForDuplicatedUserIds() {
-  //   let entities = this.entities.filter((e) => e.typeDEPR === ENTRY_TYPES.USER);
-  //   return this.ldapService.checkForDuplicatedEntitiesByPropName(
-  //     entities,
-  //     'uidnumber'
-  //   );
-  // }
-
-  // checkForDuplicatedGroupIds() {
-  //   let entities = this.entities.filter(
-  //     (e) => e.typeDEPR === ENTRY_TYPES.GROUP
-  //   );
-  //   return this.ldapService.checkForDuplicatedEntitiesByPropName(
-  //     entities,
-  //     'gidnumber'
-  //   );
+    //   let entities = this.entities.filter((e) => e.typeDEPR === ENTRY_TYPES.USER);
+    //   return this.ldapService.checkForDuplicatedEntitiesByPropName(
+    //     entities,
+    //     'uidnumber'
+    //   );
+    // }
+    // checkForDuplicatedGroupIds() {
+    //   let entities = this.entities.filter(
+    //     (e) => e.typeDEPR === ENTRY_TYPES.GROUP
+    //   );
+    //   return this.ldapService.checkForDuplicatedEntitiesByPropName(
+    //     entities,
+    //     'gidnumber'
+    //   );
   }
 
   checkGroupsForMissingMemberUids() {}
