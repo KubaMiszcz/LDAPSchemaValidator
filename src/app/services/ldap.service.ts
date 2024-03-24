@@ -89,31 +89,7 @@ export class LDAPService {
   ///////////////////////////////////////
 
 
-  checkForDuplicatedEntitiesByPropName(
-    entities: ILDAPEntry[],
-    propName: string
-  ) {
-    let result = '';
-
-    entities.forEach((entity) => {
-      let msg = `ERR: in ${propName} [ dn: ${entity.dn} ]\n`;
-      let err = false;
-      let list = entities.filter(
-        (u) =>
-          u[propName as keyof ILDAPEntry] ===
-          entity[propName as keyof ILDAPEntry]
-      );
-      if (list.length > 1) {
-        msg +=
-          `\tduplicated ${propName} for: ` +
-          `${list.map((e) => `\n\t\t[ ${e.dn} ]`)}\n`;
-        err = true;
-      }
-      result += err ? `${msg}\n` : '';
-    });
-
-    return result;
-  }
+ 
 
   // extractEntries(ldifSchemaRawInput: string): ILDAPEntry[] {
   //   let entries: ILDAPEntry[] = [];
