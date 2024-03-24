@@ -38,8 +38,7 @@ export class HomePageComponent implements OnInit {
     this.generatedOutput += this.checkForDuplicatedGroupIds();
     // this.generatedOutput += this.checkGroupsForMissingMemberUids();
     this.generatedOutput += this.checkGroupsOfNamesForMissingMembers();
-    // this.generatedOutput += this.checkUsersHomeDirectories();
-
+    this.generatedOutput += this.checkUsersHomeDirectories();
   }
 
   createSummary(entities: ILDAPEntity[]) {
@@ -159,43 +158,47 @@ export class HomePageComponent implements OnInit {
 
   checkForDuplicatedUserIds() {
     let entities = this.entities.filter((e) => e.type === ENTITY_TYPES.USER);
-    return this.checkForDuplicatedEntitiesByPropName(entities, 'uidnumber');
+    return this.appService.checkForDuplicatedEntitiesByPropName(
+      entities,
+      'uidnumber'
+    );
   }
 
   checkForDuplicatedGroupIds() {
     let entities = this.entities.filter((e) => e.type === ENTITY_TYPES.GROUP);
-    return this.checkForDuplicatedEntitiesByPropName(entities, 'gidnumber');
+    return this.appService.checkForDuplicatedEntitiesByPropName(
+      entities,
+      'gidnumber'
+    );
   }
-
 
   checkGroupsForMissingMemberUids() {}
 
-  checkForDuplicatedEntitiesByPropName(
-    entities: ILDAPEntity[],
-    propName: string
-  ) {
+  checkUsersHomeDirectories() {
     let result = '';
 
-    entities.forEach((entity) => {
-      let msg = `ERR: in ${propName} [ dn: ${entity.dn} ]\n`;
-      let err = false;
-      let list = this.entities.filter(
-        (u) =>
-          u[propName as keyof ILDAPEntity] ===
-          entity[propName as keyof ILDAPEntity]
-      );
-      if (list.length > 1) {
-        msg +=
-          `\tduplicated ${propName} for: ` +
-          `${list.map((e) => `\n\t\t[ ${e.dn} ]`)}\n`;
-        err = true;
-      }
-      result += err ? `${msg}\n` : '';
-    });
+    this.entities
+      .filter((e) => e.type === ENTITY_TYPES.USER)
+      .forEach((entity) => {
+        let err = false;
+        let msg = `ERR: in User [ dn: ${entity.dn} ]\n`;
+
+        // if (entity.homedirectory?.split('/').last) {
+          
+        // }
+        // let properHomeDir=
+
+
+        // entity.homedirectory?.forEach((m) => {
+        //   if (!this.allDNs.some((dn) => dn === m)) {
+        //     msg += `\tmember doesnt exist: ${m}\n`;
+        //     err = true;
+        //   }
+        // });
+
+        result += err ? msg + '\n' : '';
+      });
 
     return result;
   }
-
-
-  checkUsersHomeDirectories() {}
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import packageJson from './../../../package.json';
+import { ILDAPEntity } from '../models/LDAPEntity.model';
 
 
 @Injectable({
@@ -14,6 +15,41 @@ export class AppService {
   ) {
   }
 
+  checkForDuplicatedEntitiesByPropName(
+    entities: ILDAPEntity[],
+    propName: string
+  ) {
+    let result = '';
+
+    entities.forEach((entity) => {
+      let msg = `ERR: in ${propName} [ dn: ${entity.dn} ]\n`;
+      let err = false;
+      let list = entities.filter(
+        (u) =>
+          u[propName as keyof ILDAPEntity] ===
+          entity[propName as keyof ILDAPEntity]
+      );
+      if (list.length > 1) {
+        msg +=
+          `\tduplicated ${propName} for: ` +
+          `${list.map((e) => `\n\t\t[ ${e.dn} ]`)}\n`;
+        err = true;
+      }
+      result += err ? `${msg}\n` : '';
+    });
+
+    return result;
+  }
+
+
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
   // pivotArray2<T1>(array: [T1[]]) {
   //   let rows = array.length;
   //   let cols = array[0].length;
