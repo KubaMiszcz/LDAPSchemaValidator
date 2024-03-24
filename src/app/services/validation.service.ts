@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { IEntity } from '../models/Entity.model';
 import { ILDAPEntry } from '../models/LDAPEntity.model';
 
-
 @Injectable({
   providedIn: 'root',
 })
@@ -14,44 +13,34 @@ export class ValidationService {
   }
 
   checkForDuplicatedEntriesByPropName(entry: ILDAPEntry, allEntries: ILDAPEntry[], propName: string) {
-    let list = allEntries.filter(
-      (u) =>
-        u[propName as keyof ILDAPEntry] ===
-        entry[propName as keyof ILDAPEntry]
-    );
-
+    let list = allEntries.filter((u) => u[propName as keyof ILDAPEntry] === entry[propName as keyof ILDAPEntry]);
     if (list.length > 1) {
-      return `\tduplicated [ ${propName} ] for: ${list.map((e) => `\n\t\t[ ${e.dn} ]`)}`;
+      let msgs: string[] = [];
+      list.forEach((e) => {
+        msgs.push(`\tduplicated [ ${propName} ] for: ${e[propName as keyof ILDAPEntry]}`);
+      });
+      return msgs.join('\n');
     }
-    
+
     return '';
   }
 
+  checkHomedirectory(ldapEntry: ILDAPEntry): string {
+    let path = ldapEntry.homedirectory?.split('/');
+    let dirname = path?.slice(path.length - 1).toString();
 
+    if (dirname?.toLowerCase() !== ldapEntry.cn?.toLowerCase()) {
+      return `\thomedirectory name [ ${dirname} ] differs than cn [ ${ldapEntry.cn} ]`;
+    }
 
-  checkForDuplicatedEntitiesByPropNameDEPR(
-    entities: ILDAPEntry[],
-    propName: string
-  ) {
-    let result = '';
+    return '';
+  }
 
-    entities.forEach((entity) => {
-      let msg = `ERR: in ${propName} [ dn: ${entity.dn} ]\n`;
-      let err = false;
-      let list = entities.filter(
-        (u) =>
-          u[propName as keyof ILDAPEntry] ===
-          entity[propName as keyof ILDAPEntry]
-      );
-      if (list.length > 1) {
-        msg +=
-          `\tduplicated ${propName} for: ` +
-          `${list.map((e) => `\n\t\t[ ${e.dn} ]`)}\n`;
-        err = true;
-      }
-      result += err ? `${msg}\n` : '';
-    });
+  checkIfGroupExistById(ldapEntry: ILDAPEntry, allGroups: ILDAPEntry[], propName: string): string {
+    if (allGroups.some((g) => g.gidnumber === ldapEntry.gidnumber)) {
+      return `\tgroup with [ ${propName} ] = [ ${ldapEntry.gidnumber} ] wont exists`;
+    }
 
-    return result;
+    return '';
   }
 }

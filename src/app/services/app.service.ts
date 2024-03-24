@@ -19,15 +19,10 @@ export class AppService {
   version: string = packageJson.version;
   build: string = packageJson.build;
 
-  constructor(
-    private validationService: ValidationService,
-    private ldapService: LDAPService
-  ) {}
+  constructor(private validationService: ValidationService, private ldapService: LDAPService) {}
 
   analyzeSchema() {
-    this.ldifSchemaRawInput = this.validationService.validateRawInput(
-      this.ldifSchemaRawInput
-    );
+    this.ldifSchemaRawInput = this.validationService.validateRawInput(this.ldifSchemaRawInput);
 
     this.entities = this.importEntities(this.ldifSchemaRawInput);
 
@@ -43,8 +38,6 @@ export class AppService {
     this.generateReport();
   }
 
-
-
   validateSchema(entities: IEntity[]) {
     this.entities.forEach((entity) => {
       let errors: string[] = [];
@@ -52,42 +45,64 @@ export class AppService {
       switch (entity.entryType) {
         case ENTRY_TYPES.USER:
           errors.push(
-            this.validationService.checkForDuplicatedEntriesByPropName(
-              entity.ldapEntry,
-              this.allEntriesOnly,
-              'dn'
-            )
+            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'dn')
           );
-          // this.validationService.checkForDuplicated_uid(entity, this.allDNs)
-          // this.validationService.checkForDuplicated_uidnumber(entity, this.allDNs)
-          //users with suplicated IDS
-          //griup wont exist
-          // checkForDuplicatedUserIds
-          // checkUsersHomeDirectories
-
+          errors.push(
+            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'cn')
+          );
+          errors.push(
+            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'uid')
+          );
+          errors.push(
+            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'uidnumber')
+          );
+          errors.push(
+            this.validationService.checkIfGroupExistById(entity.ldapEntry, this.getAllGroups(), 'gidnumber')
+          );
+          errors.push(
+            // this.validationService.checkIfEntryExistByPropName(entity.ldapEntry., this.allEntriesOnly, 'gidnumber')
+          );
+          errors.push(
+            this.validationService.checkHomedirectory(entity.ldapEntry)
+          );
           break;
 
         case ENTRY_TYPES.GROUP:
+          errors.push(
+            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'dn')
+          );
           // checkForDuplicatedGroupIds
           // checkGroupsForMissingMemberUids();
 
           break;
 
         case ENTRY_TYPES.GROUP_OF_NAMES:
+          errors.push(
+            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'dn')
+          );
           // checkGroupsOfNamesForMissingMembers
           break;
 
         case ENTRY_TYPES.ORGANIZATIONAL_UNIT:
+          errors.push(
+            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'dn')
+          );
           break;
 
         default:
           break;
       }
 
+      errors=errors.filter(e=>!!e.length);
+
       if (errors.length > 0) {
         entity.errors = errors;
       }
     });
+  }
+
+  getAllGroups(): ILDAPEntry[] {
+    return this.entities.filter((e) => e.entryType === ENTRY_TYPES.GROUP).map((e) => e.ldapEntry);
   }
 
   importEntities(ldifSchemaRawInput: string): IEntity[] {
@@ -111,11 +126,10 @@ export class AppService {
     this.entities.forEach((e) => {
       if (e.errors?.length) {
         msg = `ERR: for dn:\n${e.ldapEntry.dn}\n`;
-        e.errors.forEach((err) => (msg += err));
-        msg += `\n`;
+        e.errors.forEach((err) => (msg += err +'\n'));
       }
 
-      this.validationReport += msg+'\n';
+      this.validationReport += msg + '\n';
     });
   }
 
