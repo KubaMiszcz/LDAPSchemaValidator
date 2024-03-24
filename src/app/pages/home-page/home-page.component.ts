@@ -1,12 +1,10 @@
+import { ILDAPEntityKEYSVALUES } from './../../models/LDAPEntity.model';
 import { ILDAPEntity } from 'src/app/models/LDAPEntity.model';
 import { AppService } from '../../services/app.service';
 import { Component, OnInit } from '@angular/core';
-import {
-  EXAMPLE_LDIF_SCHEMA,
-} from 'src/assets/app-example-data';
+import { EXAMPLE_LDIF_SCHEMA } from 'src/assets/app-example-data';
 import { DATA_TYPES, ENTITY_TYPES } from 'src/app/models/LDAPTypes.enum';
-
-
+import { IKeyValues } from 'src/app/models/KeyValues';
 
 @Component({
   templateUrl: './home-page.component.html',
@@ -15,6 +13,7 @@ import { DATA_TYPES, ENTITY_TYPES } from 'src/app/models/LDAPTypes.enum';
 export class HomePageComponent implements OnInit {
   ldifSchemaRawInput = EXAMPLE_LDIF_SCHEMA;
   entities: ILDAPEntity[] = [];
+  entitiesKEYSVALUES: ILDAPEntityKEYSVALUES[] = [];
   allDNs: string[] = [];
   generatedOutput = '';
 
@@ -22,30 +21,26 @@ export class HomePageComponent implements OnInit {
 
   ngOnInit(): void {
     this.validateSchema();
-    this.extractEntities();
+    // this.extractEntities();
   }
 
   checkForOrphans() {
-    let result='';
+    let result = '';
 
     this.validateSchema();
-    this.extractEntities();
-
-
+    // this.extractEntities();
+    this.extractEntitiesKEYSVALUES();
     this.allDNs = this.entities.map((e) => e.dn);
 
-    let test = this.entities.filter((e) => !e.cn);
-    // console.log(this.allDNs);
-    console.log(test);
+    // let test = this.entities.filter((e) => !e.cn);
+    // console.log(test);
+
     this.checkGroupsOfNamesForMissingMembers();
 
     this.checkGroupsForMissingMemberUids();
     this.checkForDuplicatedUserIds();
     this.checkForDuplicatedGroupIds();
     this.checkUsersHomeDirectories();
-
-
-
   }
 
   validateSchema() {
@@ -106,7 +101,12 @@ export class HomePageComponent implements OnInit {
   getSinglePropertyInRawEntity(entity: string, propName: string) {
     let result = this.getPropertiesInRawEntity(entity, propName);
     if (result.length > 1) {
-      let msg = "ERR: more than one prop '" + propName + "'" + ' with values: ' + result
+      let msg =
+        "ERR: more than one prop '" +
+        propName +
+        "'" +
+        ' with values: ' +
+        result;
       return msg;
     }
 
@@ -128,4 +128,37 @@ export class HomePageComponent implements OnInit {
   checkForDuplicatedUserIds() {}
   checkForDuplicatedGroupIds() {}
   checkUsersHomeDirectories() {}
+
+  extractEntitiesKEYSVALUES() {
+    let rawEntities = this.ldifSchemaRawInput
+      .split('\n\n')
+      .filter((e) => e.startsWith('# Entry'));
+
+    this.entitiesKEYSVALUES = [];
+    rawEntities.forEach((e) => {
+      let entity: ILDAPEntityKEYSVALUES = {
+        dn: '',
+      };
+      let rows = e.split('\n').filter((r) => !r.startsWith('#'));
+      let keyvalues = rows.map((r) => {
+        let pair=        r.split(': ')
+        let result: IKeyValues = {
+          key: pair[0],
+          values: [pair[1]],
+        };
+        return result;
+      });
+
+      entity.dn = keyvalues.find((k) => k.key === 'dn')?.values[0];
+      entity.props=keyvalues;
+      console.log(entity);
+    });
+
+    //       };
+
+    //       this.entitiesKEYSVALUES.push(entity);
+    //     });
+
+    //     console.log(this.entities);
+  }
 }

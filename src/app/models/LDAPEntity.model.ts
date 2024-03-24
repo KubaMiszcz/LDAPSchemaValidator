@@ -1,4 +1,4 @@
-import { IKeyValues } from './KeyValues';
+import { IKeyValue, IKeyValues } from './KeyValues';
 import { ENTITY_TYPES } from './LDAPTypes.enum';
 
 export interface ILDAPEntity {
@@ -21,5 +21,9 @@ export interface ILDAPEntity {
 
   type: ENTITY_TYPES;
   content?: string;
-  props?: IKeyValues[];
+}
+
+export interface ILDAPEntityKEYSVALUES {
+  dn: string;
+  props?: IKeyValue<string>[];
 }
