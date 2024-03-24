@@ -1,7 +1,6 @@
-import { IKeyValue, IKeyValues } from './KeyValues';
 import { ENTITY_TYPES } from './LDAPTypes.enum';
 
-export interface ILDAPEntity {
+export interface ILDAPEntry {
   dn: string;
   cn?: string;
   dc?: string;
@@ -19,11 +18,13 @@ export interface ILDAPEntity {
   memberuid?: string[];
   objectclass?: string[];
 
+  //extract outside
   type: ENTITY_TYPES;
   content?: string;
+  errors?: string[];
 }
 
-export interface ILDAPEntityKEYSVALUES {
-  dn: string;
-  props?: IKeyValue<string>[];
-}
+// export interface ILDAPEntityKEYSVALUES {
+//   dn: string;
+//   props?: IKeyValue<string>[];
+// }

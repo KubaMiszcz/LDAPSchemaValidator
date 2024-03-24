@@ -1,47 +1,59 @@
-import { ILDAPEntityKEYSVALUES } from './../../models/LDAPEntity.model';
-import { ILDAPEntity } from 'src/app/models/LDAPEntity.model';
+import { LDIFService } from './../../services/ldif.service';
+import { ValidationService } from './../../services/validation.service';
+import { ILDAPEntry } from 'src/app/models/LDAPEntity.model';
 import { AppService } from '../../services/app.service';
 import { Component, OnInit } from '@angular/core';
 import { EXAMPLE_LDIF_SCHEMA } from 'src/assets/app-example-data';
 import { DATA_TYPES, ENTITY_TYPES } from 'src/app/models/LDAPTypes.enum';
-import { IKeyValue, IKeyValues } from 'src/app/models/KeyValues';
 
 @Component({
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss'],
 })
 export class HomePageComponent implements OnInit {
-  ldifSchemaRawInput = EXAMPLE_LDIF_SCHEMA;
-  entities: ILDAPEntity[] = [];
-  entitiesKEYSVALUES: ILDAPEntityKEYSVALUES[] = [];
-  allDNs: string[] = [];
-  generatedOutput = '';
+  ldifSchemaRawInput = '';
+  entities: ILDAPEntry[] = [];
+  entries: ILDAPEntry[] = [];
+  validationResults = '';
 
-  constructor(private appService: AppService) {}
+
+
+
+  allDNsDEPR: string[] = [];
+
+  constructor(
+    private appService: AppService,
+    private validationService: ValidationService,
+    private ldifService: LDIFService,
+  ) {
+    this.ldifSchemaRawInput = appService.ldifSchemaRawInput;
+  }
 
   ngOnInit(): void {
-    this.validateInput();
-    this.extractEntities();
+    this.appService.validateSchema();
+    this.validationResults = this.appService.validationResults;
   }
 
   ValidateSchema() {
-    this.validateInput();
-    this.extractEntities();
-    // this.extractEntitiesKEYSVALUESDEPR();
-    this.allDNs = this.entities.map((e) => e.dn);
-
-    // let test = this.entities.filter((e) => !e.cn);
-    // console.log(test);
-
-    this.generatedOutput = this.createSummary(this.entities);
-    this.generatedOutput += this.checkForDuplicatedUserIds();
-    this.generatedOutput += this.checkForDuplicatedGroupIds();
-    // this.generatedOutput += this.checkGroupsForMissingMemberUids();
-    this.generatedOutput += this.checkGroupsOfNamesForMissingMembers();
-    this.generatedOutput += this.checkUsersHomeDirectories();
+    this.validationResults =  this.appService.validateSchema();
   }
 
-  createSummary(entities: ILDAPEntity[]) {
+  //////////////////////////////////
+  //////////////////////////////////
+  //////////////////////////////////
+  //////////////////////////////////
+  //////////////////////////////////
+  //////////////////////////////////
+  //////////////////////////////////
+  //////////////////////////////////
+  //////////////////////////////////
+  //////////////////////////////////
+  //////////////////////////////////
+
+
+
+
+  createSummary(entities: ILDAPEntry[]) {
     let result = '';
 
     entities.forEach((entity) => {
@@ -61,78 +73,6 @@ export class HomePageComponent implements OnInit {
     return result;
   }
 
-  validateInput() {
-    this.ldifSchemaRawInput = this.ldifSchemaRawInput.replaceAll('\n ', '');
-  }
-
-  extractEntities() {
-    let rawEntities = this.ldifSchemaRawInput
-      .split('\n\n')
-      .filter((e) => e.startsWith('# Entry'));
-
-    this.entities = [];
-    rawEntities.forEach((e) => {
-      let entity: ILDAPEntity = {
-        dn: this.getSinglePropertyInRawEntity(e, 'dn') ?? '',
-        cn: this.getSinglePropertyInRawEntity(e, 'cn'),
-        dc: this.getSinglePropertyInRawEntity(e, 'dc'),
-        description: this.getSinglePropertyInRawEntity(e, 'description'),
-        gidnumber: this.getSinglePropertyInRawEntity(e, 'gidnumber'),
-        homedirectory: this.getSinglePropertyInRawEntity(e, 'homedirectory'),
-        member: this.getPropertiesInRawEntity(e, 'member'),
-        memberuid: this.getPropertiesInRawEntity(e, 'memberuid'),
-        o: this.getSinglePropertyInRawEntity(e, 'o'),
-        objectclass: this.getPropertiesInRawEntity(e, 'objectclass'),
-        ou: this.getSinglePropertyInRawEntity(e, 'ou'),
-        sn: this.getSinglePropertyInRawEntity(e, 'sn'),
-        uid: this.getSinglePropertyInRawEntity(e, 'uid'),
-        uidnumber: this.getSinglePropertyInRawEntity(e, 'uidnumber'),
-        userpassword: this.getSinglePropertyInRawEntity(e, 'userpassword'),
-        version: this.getSinglePropertyInRawEntity(e, 'version'),
-        type: this.getEntityType(e),
-      };
-
-      this.entities.push(entity);
-    });
-
-    console.log(this.entities);
-  }
-
-  getEntityType(entity: string): ENTITY_TYPES {
-    let objectclasses = this.getPropertiesInRawEntity(entity, 'objectclass');
-    if (objectclasses.find((c) => c === 'groupOfNames')) {
-      return ENTITY_TYPES.GROUP_OF_NAMES;
-    }
-    if (objectclasses.find((c) => c === 'organizationalUnit')) {
-      return ENTITY_TYPES.ORGANIZATIONAL_UNIT;
-    }
-    if (objectclasses.find((c) => c === 'posixAccount')) {
-      return ENTITY_TYPES.USER;
-    }
-    if (objectclasses.find((c) => c === 'posixGroup')) {
-      return ENTITY_TYPES.GROUP;
-    }
-
-    return ENTITY_TYPES.OTHER;
-  }
-
-  getSinglePropertyInRawEntity(entity: string, propName: string) {
-    let result = this.getPropertiesInRawEntity(entity, propName);
-    if (result.length > 1) {
-      let msg = `ERR: more than one prop [ ${propName} ] with values: ${result}`;
-      return msg;
-    }
-
-    return result[0];
-  }
-
-  getPropertiesInRawEntity(entity: string, propName: string): string[] {
-    propName = propName + ': ';
-    return entity
-      .split('\n')
-      .filter((s) => s.startsWith(propName))
-      .map((p) => p.replace(propName, '').trim());
-  }
 
   checkGroupsOfNamesForMissingMembers() {
     let result = '';
@@ -144,7 +84,7 @@ export class HomePageComponent implements OnInit {
         let msg = `ERR: in GroupOfNames [ dn: ${entity.dn} ]\n`;
 
         entity.member?.forEach((m) => {
-          if (!this.allDNs.some((dn) => dn === m)) {
+          if (!this.allDNsDEPR.some((dn) => dn === m)) {
             msg += `\tmember doesnt exist: ${m}\n`;
             err = true;
           }
@@ -158,7 +98,7 @@ export class HomePageComponent implements OnInit {
 
   checkForDuplicatedUserIds() {
     let entities = this.entities.filter((e) => e.type === ENTITY_TYPES.USER);
-    return this.appService.checkForDuplicatedEntitiesByPropName(
+    return this.ldifService.checkForDuplicatedEntitiesByPropName(
       entities,
       'uidnumber'
     );
@@ -166,7 +106,7 @@ export class HomePageComponent implements OnInit {
 
   checkForDuplicatedGroupIds() {
     let entities = this.entities.filter((e) => e.type === ENTITY_TYPES.GROUP);
-    return this.appService.checkForDuplicatedEntitiesByPropName(
+    return this.ldifService.checkForDuplicatedEntitiesByPropName(
       entities,
       'gidnumber'
     );
@@ -184,10 +124,9 @@ export class HomePageComponent implements OnInit {
         let msg = `ERR: in User [ dn: ${entity.dn} ]\n`;
 
         // if (entity.homedirectory?.split('/').last) {
-          
+
         // }
         // let properHomeDir=
-
 
         // entity.homedirectory?.forEach((m) => {
         //   if (!this.allDNs.some((dn) => dn === m)) {
