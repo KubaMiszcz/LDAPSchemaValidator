@@ -8,15 +8,15 @@
 
 <div class="d-flaex justify-csontent-center m-3">
     <div class="d-grid gsap-2">
-        <button type="button" name="" id="" class="btn btn-primary btn-block" (click)="validateSchema()">
-            validateSchema
+        <button type="button" name="" id="" class="btn btn-primary btn-block" (click)="validateInput()">
+            validateInput
         </button>
     </div>
 </div>
 <div class="d-flaex justify-csontent-center m-3">
     <div class="d-grid gsap-2">
-        <button type="button" name="" id="" class="btn btn-primary btn-block" (click)="checkForOrphans()">
-            checkForOrphans
+        <button type="button" name="" id="" class="btn btn-primary btn-block" (click)="ValidateSchema()">
+            ValidateSchema
         </button>
     </div>
 </div>
@@ -28,18 +28,6 @@
 
 
 
-
-
-
-
-
-
-
-<hr>
-<hr>
-<hr>
-<hr>
-<hr>
 
 <div class="d-flex justify-content-center">
     <!-- <div class="col-5 form-group me-4 mb-3 ">
@@ -66,19 +54,11 @@
 </div>
 
 
-<div class="d-flaex justify-csontent-center m-3">
-    <div class="d-grid gsap-2">
-        <button type="button" name="" id="" class="btn btn-primary btn-block">
-            Generate
-        </button>
-    </div>
-</div>
-
 
 <div class="d-flsex justify-content-center">
     <div class="form-group m-3">
         <label for="exampleFormControlInput1" class="form-label">Result</label>
-        <textarea [(ngModel)]="generatedOutput" aria-label="asads" class="form-control" name="asd" id="text1" rows="15"
+        <textarea [(ngModel)]="generatedOutput" aria-label="asads" class="form-control generated-output" name="asd" id="text1" rows="15"
             placeholder="tekst"></textarea>
     </div>
 </div>

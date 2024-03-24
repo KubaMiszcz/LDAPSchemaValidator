@@ -4,7 +4,7 @@ import { AppService } from '../../services/app.service';
 import { Component, OnInit } from '@angular/core';
 import { EXAMPLE_LDIF_SCHEMA } from 'src/assets/app-example-data';
 import { DATA_TYPES, ENTITY_TYPES } from 'src/app/models/LDAPTypes.enum';
-import { IKeyValues } from 'src/app/models/KeyValues';
+import { IKeyValue, IKeyValues } from 'src/app/models/KeyValues';
 
 @Component({
   templateUrl: './home-page.component.html',
@@ -20,30 +20,49 @@ export class HomePageComponent implements OnInit {
   constructor(private appService: AppService) {}
 
   ngOnInit(): void {
-    this.validateSchema();
-    // this.extractEntities();
+    this.validateInput();
+    this.extractEntities();
   }
 
-  checkForOrphans() {
-    let result = '';
-
-    this.validateSchema();
-    // this.extractEntities();
-    this.extractEntitiesKEYSVALUES();
+  ValidateSchema() {
+    this.validateInput();
+    this.extractEntities();
+    // this.extractEntitiesKEYSVALUESDEPR();
     this.allDNs = this.entities.map((e) => e.dn);
 
     // let test = this.entities.filter((e) => !e.cn);
     // console.log(test);
 
-    this.checkGroupsOfNamesForMissingMembers();
+    this.generatedOutput = this.createSummary(this.entities);
+    this.generatedOutput += this.checkGroupsOfNamesForMissingMembers();
+    this.generatedOutput += this.checkForDuplicatedUserIds();
 
-    this.checkGroupsForMissingMemberUids();
-    this.checkForDuplicatedUserIds();
-    this.checkForDuplicatedGroupIds();
-    this.checkUsersHomeDirectories();
+    // this.generatedOutput += this.checkGroupsForMissingMemberUids();
+    // this.generatedOutput += this.checkForDuplicatedGroupIds();
+    // this.generatedOutput += this.checkUsersHomeDirectories();
   }
 
-  validateSchema() {
+  createSummary(entities: ILDAPEntity[]) {
+    let result = '';
+
+    entities.forEach((entity) => {
+      let msg = '';
+      Object.entries(entity)
+        .map((entry) => entry[1])
+        .filter((e) => typeof e === 'string')
+        .filter((e) => e.startsWith('ERR'))
+        .forEach((v) => {
+          msg += 'ERR: in entity [dn: ' + entity.dn + ']\n' + '\t' + v + '\n';
+          console.log(msg);
+        });
+
+      result += msg;
+    });
+
+    return result;
+  }
+
+  validateInput() {
     this.ldifSchemaRawInput = this.ldifSchemaRawInput.replaceAll('\n ', '');
   }
 
@@ -71,7 +90,7 @@ export class HomePageComponent implements OnInit {
         uidnumber: this.getSinglePropertyInRawEntity(e, 'uidnumber'),
         userpassword: this.getSinglePropertyInRawEntity(e, 'userpassword'),
         version: this.getSinglePropertyInRawEntity(e, 'version'),
-        type: this.getType(e),
+        type: this.getEntityType(e),
       };
 
       this.entities.push(entity);
@@ -80,7 +99,7 @@ export class HomePageComponent implements OnInit {
     console.log(this.entities);
   }
 
-  getType(entity: string): ENTITY_TYPES {
+  getEntityType(entity: string): ENTITY_TYPES {
     let objectclasses = this.getPropertiesInRawEntity(entity, 'objectclass');
     if (objectclasses.find((c) => c === 'groupOfNames')) {
       return ENTITY_TYPES.GROUP_OF_NAMES;
@@ -101,12 +120,7 @@ export class HomePageComponent implements OnInit {
   getSinglePropertyInRawEntity(entity: string, propName: string) {
     let result = this.getPropertiesInRawEntity(entity, propName);
     if (result.length > 1) {
-      let msg =
-        "ERR: more than one prop '" +
-        propName +
-        "'" +
-        ' with values: ' +
-        result;
+      let msg = `ERR: more than one prop [ ${propName} ] with values: ${result}`;
       return msg;
     }
 
@@ -122,43 +136,69 @@ export class HomePageComponent implements OnInit {
   }
 
   checkGroupsForMissingMemberUids() {}
+
   checkGroupsOfNamesForMissingMembers() {
-    // let allGroupOfMembers
-  }
-  checkForDuplicatedUserIds() {}
-  checkForDuplicatedGroupIds() {}
-  checkUsersHomeDirectories() {}
+    let result = '';
 
-  extractEntitiesKEYSVALUES() {
-    let rawEntities = this.ldifSchemaRawInput
-      .split('\n\n')
-      .filter((e) => e.startsWith('# Entry'));
+    this.entities
+      .filter((e) => e.type === ENTITY_TYPES.GROUP_OF_NAMES)
+      .forEach((entity) => {
+        let err = false;
+        let msg = `ERR: in GroupOfNames [ dn: ${entity.dn} ]\n'`;
 
-    this.entitiesKEYSVALUES = [];
-    rawEntities.forEach((e) => {
-      let entity: ILDAPEntityKEYSVALUES = {
-        dn: '',
-      };
-      let rows = e.split('\n').filter((r) => !r.startsWith('#'));
-      let keyvalues = rows.map((r) => {
-        let pair=        r.split(': ')
-        let result: IKeyValues = {
-          key: pair[0],
-          values: [pair[1]],
-        };
-        return result;
+        entity.member?.forEach((m) => {
+          if (!this.allDNs.some((dn) => dn === m)) {
+            msg += `\tmember doesnt exist: ${m}\n`;
+            err = true;
+          }
+        });
+
+        result += err ? msg + '\n' : '';
       });
 
-      entity.dn = keyvalues.find((k) => k.key === 'dn')?.values[0];
-      entity.props=keyvalues;
-      console.log(entity);
+    return result;
+  }
+
+  checkForDuplicatedUserIds() {
+    let result = '';
+
+    let uids = [];
+    this.entities.forEach((entity) => {
+      let msg = `ERR: in uidnumber [ dn: ${entity.dn} ]\n`;
+      let err = false;
+      let list = this.entities.filter((u) => u.uidnumber === entity.uidnumber);
+      if (list.length > 1) {
+        msg += `\tduplicated uidnumber for: ${list.map(
+          (e) => `\n\t\t[ ${e.dn} ]`
+        )}\n`;
+        err = true;
+      }
+      result += err ? `${msg}\n` : '';
     });
 
-    //       };
-
-    //       this.entitiesKEYSVALUES.push(entity);
-    //     });
-
-    //     console.log(this.entities);
+    return result;
   }
+
+  checkForDuplicatedEntitiesXXXXXXXXXXXXXXXX(propName: string) {
+    let result = '';
+
+    this.entities.forEach((entity) => {
+      let msg = `ERR: in ${propName} [ dn: ${entity.dn} ]\n`;
+      let err = false;
+      let list = this.entities.filter((u) => u.uidnumber === entity.uidnumber);
+      if (list.length > 1) {
+        msg +=
+          `\tduplicated ${propName} for: ` +
+          `${list.map((e) => `\n\t\t[ ${e.dn} ]`)}\n`;
+        err = true;
+      }
+      result += err ? `${msg}\n` : '';
+    });
+
+    return result;
+  }
+
+  checkForDuplicatedGroupIds() {}
+
+  checkUsersHomeDirectories() {}
 }

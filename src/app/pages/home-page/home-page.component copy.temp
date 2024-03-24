@@ -1,0 +1,35 @@
+extractEntitiesKEYSVALUESDEPR() {
+  let rawEntities = this.ldifSchemaRawInput
+    .split('\n\n')
+    .filter((e) => e.startsWith('# Entry'));
+
+  this.entitiesKEYSVALUES = [];
+  rawEntities.forEach((e) => {
+    let entity: ILDAPEntityKEYSVALUES = {
+      dn: '',
+    };
+
+    let rows = e.split('\n').filter((r) => !r.startsWith('#'));
+
+    let keyvalues = rows.map((r) => {
+      let pair = r.split(': ');
+      let result: IKeyValue<string> = {
+        key: pair[0],
+        value: pair[1],
+      };
+
+      return result;
+    });
+
+    entity.dn = keyvalues.find((k) => k.key === 'dn')?.value ?? 'no DN';
+    entity.props = keyvalues;
+    // console.log(entity);
+  });
+
+  //       };
+
+  //       this.entitiesKEYSVALUES.push(entity);
+  //     });
+
+  //     console.log(this.entities);
+}
