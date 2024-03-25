@@ -42,46 +42,34 @@ export class AppService {
     entities.forEach((entity) => {
       let errors: string[] = [];
       let warnings: string[] = [];
-      errors.push(this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'dn'));
 
       switch (entity.entryType) {
         case ENTRY_TYPES.USER:
-          errors.push(this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'cn'));
-
-          errors.push(this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'uid'));
-
-          errors.push(
-            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'uidnumber')
-          );
-
-          errors.push(
-            this.validationService.checkIfEntryExistByPropName(
-              entity.ldapEntry,
-              this.getEntriesByType(ENTRY_TYPES.GROUP),
-              'gidnumber'
-            )
-          );
-
-          errors.push(this.validationService.checkHomedirectory(entity.ldapEntry));
-
+          errors.push(this.checkForDuplicated_dns(entity.ldapEntry));
+          errors.push(this.checkForDuplicated_cns(entity.ldapEntry));
+          errors.push(this.checkForDuplicated_uids(entity.ldapEntry));
+          errors.push(this.checkForDuplicated_uidnumbers(entity.ldapEntry));
+          errors.push(this.checkForMissingGroup(entity.ldapEntry));
+          errors.push(this.validationService.checkForHomedirectory(entity.ldapEntry));
           break;
 
         case ENTRY_TYPES.GROUP:
-          errors.push(this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.getEntriesByType(ENTRY_TYPES.GROUP), 'gidnumber'));
-          errors.push(this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.getEntriesByType(ENTRY_TYPES.GROUP), 'gidnumber'));
-          checkGroupsForMissingMemberUids();
-
-
+          errors.push(this.checkForDuplicated_dns(entity.ldapEntry));
+          errors.push(this.checkForDuplicated_gidnumbers(entity.ldapEntry));
+          errors.push(...this.checkGroupsForMissingMemberUids(entity.ldapEntry));
           break;
 
         case ENTRY_TYPES.GROUP_OF_NAMES:
+          errors.push(this.checkForDuplicated_dns(entity.ldapEntry));
           // checkGroupsOfNamesForMissingMembers
           break;
 
         case ENTRY_TYPES.ORGANIZATIONAL_UNIT:
+          errors.push(this.checkForDuplicated_dns(entity.ldapEntry));
           break;
 
         default:
+          errors.push(this.checkForDuplicated_dns(entity.ldapEntry));
           break;
       }
 
@@ -89,12 +77,42 @@ export class AppService {
       if (errors.length > 0) {
         entity.errors = errors;
       }
-      
+
       warnings = warnings.filter((e) => !!e.length);
       if (warnings.length > 0) {
         entity.warnings = warnings;
       }
     });
+  }
+  checkForDuplicated_gidnumbers(ldapEntry: ILDAPEntry): string {
+    return this.validationService.checkForDuplicatedEntriesByPropName(
+      ldapEntry,
+      this.getEntriesByType(ENTRY_TYPES.GROUP),
+      'gidnumber'
+    );
+  }
+
+  checkForMissingGroup(ldapEntry: ILDAPEntry): string {
+    return this.validationService.checkIfEntryExistByPropName(
+      ldapEntry,
+      this.getEntriesByType(ENTRY_TYPES.GROUP),
+      'gidnumber'
+    );
+  }
+
+  checkForDuplicated_uidnumbers(ldapEntry: ILDAPEntry): string {
+    return this.validationService.checkForDuplicatedEntriesByPropName(ldapEntry, this.allEntriesOnly, 'uidnumber');
+  }
+
+  checkForDuplicated_uids(ldapEntry: ILDAPEntry): string {
+    return this.validationService.checkForDuplicatedEntriesByPropName(ldapEntry, this.allEntriesOnly, 'uid');
+  }
+  checkForDuplicated_cns(ldapEntry: ILDAPEntry): string {
+    return this.validationService.checkForDuplicatedEntriesByPropName(ldapEntry, this.allEntriesOnly, 'cn');
+  }
+
+  checkForDuplicated_dns(entry: ILDAPEntry): string {
+    return this.validationService.checkForDuplicatedEntriesByPropName(entry, this.allEntriesOnly, 'dn');
   }
 
   getEntriesByType(type: ENTRY_TYPES): ILDAPEntry[] {
@@ -117,7 +135,7 @@ export class AppService {
   }
 
   generateReport() {
-let err = this.entities.filter((e) => e.errors?.length??0 > 0);
+    let err = this.entities.filter((e) => e.errors?.length ?? 0 > 0);
 
     this.validationReport = '';
     this.entities.forEach((e) => {
@@ -126,7 +144,7 @@ let err = this.entities.filter((e) => e.errors?.length??0 > 0);
         msg = `ERR: for ${e.entryType} with dn: [ ${e.ldapEntry.dn} ]\n`;
         e.errors.forEach((err) => (msg += err + '\n'));
       }
-      
+
       this.validationReport += msg + '\n';
     });
 
@@ -136,7 +154,7 @@ let err = this.entities.filter((e) => e.errors?.length??0 > 0);
         msg = `ERR: for ${e.entryType} with dn: [ ${e.ldapEntry.dn} ]\n`;
         e.warnings.forEach((err) => (msg += err + '\n'));
       }
-      
+
       this.validationReport += msg + '\n';
     });
   }
@@ -150,91 +168,17 @@ let err = this.entities.filter((e) => e.errors?.length??0 > 0);
   ////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////
 
-  // createSummary(entities: ILDAPEntry[]) {
-  //   let result = '';
+  checkGroupsForMissingMemberUids(ldapEntry: ILDAPEntry): string[] {
+    let msg: string[] = [];
+    let allUsers = this.getEntriesByType(ENTRY_TYPES.USER);
+    let propName = 'uid';
+    ldapEntry.memberuids?.forEach((uid) => {
+      let user = allUsers.find((u) => u.uid === uid);
+      if (!user) {
+        msg.push(`\tmemberuid with [ ${propName} ] = [ ${ldapEntry[propName as keyof ILDAPEntry]} ] wont exists`);
+      }
+    });
 
-  //   entities.forEach((entity) => {
-  //     let msg = '';
-  //     Object.entries(entity)
-  //       .map((entry) => entry[1])
-  //       .filter((e) => typeof e === 'string')
-  //       .filter((e) => e.startsWith('ERR'))
-  //       .forEach((v) => {
-  //         msg += 'ERR: in entity [dn: ' + entity.dn + ']\n' + '\t' + v + '\n';
-  //         console.log(msg);
-  //       });
-
-  //     result += msg;
-  //   });
-
-  //   return result;
-  // }
-
-  checkGroupsOfNamesForMissingMembers() {
-    let result = '';
-
-    // this.entities
-    //   .filter((e) => e.typeDEPR === ENTRY_TYPES.GROUP_OF_NAMES)
-    //   .forEach((entity) => {
-    //     let err = false;
-    //     let msg = `ERR: in GroupOfNames [ dn: ${entity.dn} ]\n`;
-
-    //     entity.member?.forEach((m) => {
-    //       if (!this.allDNsDEPR.some((dn) => dn === m)) {
-    //         msg += `\tmember doesnt exist: ${m}\n`;
-    //         err = true;
-    //       }
-    //     });
-
-    //     result += err ? msg + '\n' : '';
-    //   });
-
-    return result;
-  }
-
-  checkForDuplicatedUserIds() {
-    //   let entities = this.entities.filter((e) => e.typeDEPR === ENTRY_TYPES.USER);
-    //   return this.ldapService.checkForDuplicatedEntitiesByPropName(
-    //     entities,
-    //     'uidnumber'
-    //   );
-    // }
-    // checkForDuplicatedGroupIds() {
-    //   let entities = this.entities.filter(
-    //     (e) => e.typeDEPR === ENTRY_TYPES.GROUP
-    //   );
-    //   return this.ldapService.checkForDuplicatedEntitiesByPropName(
-    //     entities,
-    //     'gidnumber'
-    //   );
-  }
-
-  checkGroupsForMissingMemberUids() {}
-
-  checkUsersHomeDirectories() {
-    let result = '';
-
-    // this.entities
-    //   .filter((e) => e.type === ENTRY_TYPES.USER)
-    //   .forEach((entity) => {
-    //     let err = false;
-    //     let msg = `ERR: in User [ dn: ${entity.dn} ]\n`;
-
-    //     // if (entity.homedirectory?.split('/').last) {
-
-    //     // }
-    //     // let properHomeDir=
-
-    //     // entity.homedirectory?.forEach((m) => {
-    //     //   if (!this.allDNs.some((dn) => dn === m)) {
-    //     //     msg += `\tmember doesnt exist: ${m}\n`;
-    //     //     err = true;
-    //     //   }
-    //     // });
-
-    //     result += err ? msg + '\n' : '';
-    //   });
-
-    return result;
+    return msg;
   }
 }

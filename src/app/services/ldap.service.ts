@@ -25,10 +25,10 @@ export class LDAPService {
         rawEntry,
         'homedirectory'
       ),
-      member: this.getPropertiesInRawEntity(rawEntry, 'member'),
-      memberuid: this.getPropertiesInRawEntity(rawEntry, 'memberuid'),
+      members: this.getPropertiesInRawEntity(rawEntry, 'member'),
+      memberuids: this.getPropertiesInRawEntity(rawEntry, 'memberuid'),
       o: this.getSinglePropertyInRawEntity(rawEntry, 'o'),
-      objectclass: this.getPropertiesInRawEntity(rawEntry, 'objectclass'),
+      objectclasses: this.getPropertiesInRawEntity(rawEntry, 'objectclass'),
       ou: this.getSinglePropertyInRawEntity(rawEntry, 'ou'),
       sn: this.getSinglePropertyInRawEntity(rawEntry, 'sn'),
       uid: this.getSinglePropertyInRawEntity(rawEntry, 'uid'),

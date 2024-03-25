@@ -14,9 +14,9 @@ export interface ILDAPEntry {
   uidnumber?: string;
   userpassword?: string;
   version?: string;
-  member?: string[];
-  memberuid?: string[];
-  objectclass?: string[];
+  members?: string[];
+  memberuids?: string[];
+  objectclasses?: string[];
 }
 
 // export interface ILDAPEntityKEYSVALUES {
