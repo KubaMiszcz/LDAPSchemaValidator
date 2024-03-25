@@ -11,7 +11,7 @@ export class LDAPService {
   extractRawEntries(ldifSchemaRawInput: string) {
     return ldifSchemaRawInput
       .split('\n\n')
-      .filter((e) => e.startsWith('# Entry'));
+      .filter((e) => e.includes('dn: '));
   }
 
   convertRawEntryToObject(rawEntry: string): ILDAPEntry {
@@ -43,7 +43,7 @@ export class LDAPService {
   getSinglePropertyInRawEntity(entity: string, propName: string) {
     let result = this.getPropertiesInRawEntity(entity, propName);
     if (result.length > 1) {
-      //kmm move it to errors
+      //kmm move it to errors in entity
       let msg = `ERR: more than one prop [ ${propName} ] with values: ${result}`;
       return msg;
     }
@@ -77,51 +77,4 @@ export class LDAPService {
 
     return ENTRY_TYPES.OTHER;
   }
-
-
-  ///////////////////////////////////////
-  ///////////////////////////////////////
-  ///////////////////////////////////////
-  ///////////////////////////////////////
-  ///////////////////////////////////////
-  ///////////////////////////////////////
-  ///////////////////////////////////////
-  ///////////////////////////////////////
-
-
- 
-
-  // extractEntries(ldifSchemaRawInput: string): ILDAPEntry[] {
-  //   let entries: ILDAPEntry[] = [];
-
-  //   let rawEntries = this.extractRawEntries(ldifSchemaRawInput);
-  //   rawEntries.forEach((e) => {
-  //     let entry: ILDAPEntry = {
-  //       dn: this.getSinglePropertyInRawEntity(e, 'dn') ?? '',
-  //       cn: this.getSinglePropertyInRawEntity(e, 'cn'),
-  //       dc: this.getSinglePropertyInRawEntity(e, 'dc'),
-  //       description: this.getSinglePropertyInRawEntity(e, 'description'),
-  //       gidnumber: this.getSinglePropertyInRawEntity(e, 'gidnumber'),
-  //       homedirectory: this.getSinglePropertyInRawEntity(e, 'homedirectory'),
-  //       member: this.getPropertiesInRawEntity(e, 'member'),
-  //       memberuid: this.getPropertiesInRawEntity(e, 'memberuid'),
-  //       o: this.getSinglePropertyInRawEntity(e, 'o'),
-  //       objectclass: this.getPropertiesInRawEntity(e, 'objectclass'),
-  //       ou: this.getSinglePropertyInRawEntity(e, 'ou'),
-  //       sn: this.getSinglePropertyInRawEntity(e, 'sn'),
-  //       uid: this.getSinglePropertyInRawEntity(e, 'uid'),
-  //       uidnumber: this.getSinglePropertyInRawEntity(e, 'uidnumber'),
-  //       userpassword: this.getSinglePropertyInRawEntity(e, 'userpassword'),
-  //       version: this.getSinglePropertyInRawEntity(e, 'version'),
-  //       type: this.getEntityType(e),
-  //     };
-
-  //     entries.push(entry);
-  //   });
-
-  //   return entries;
-  // }
-
- 
-  
 }

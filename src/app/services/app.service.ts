@@ -25,14 +25,10 @@ export class AppService {
     this.ldifSchemaRawInput = this.validationService.validateRawInput(this.ldifSchemaRawInput);
 
     this.entities = this.importEntities(this.ldifSchemaRawInput);
+    //kmm get import errors from rawentites values
 
-    // this.extractEntitiesKEYSVALUESDEPR();
     this.allEntriesOnly = this.entities.map((e) => e.ldapEntry);
 
-    // let test = this.entities.filter((e) => !e.cn);
-    // console.log(test);
-
-    // this.validationResults = this.createSummary(this.entities);
     this.validateSchema(this.entities);
 
     this.generateReport();
@@ -160,15 +156,6 @@ export class AppService {
       }
     });
   }
-
-  ////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////
 
   checkGroupsForMissingMembers(ldapEntry: ILDAPEntry,type: ENTRY_TYPES): string[] {
     let msg: string[] = [];

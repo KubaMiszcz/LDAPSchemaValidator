@@ -9,7 +9,6 @@ export class CoreService {
   ) {
   }
 
-
   pivotArray(array: any[]) {
     let rows = array.length;
     let cols = array[0].length;
