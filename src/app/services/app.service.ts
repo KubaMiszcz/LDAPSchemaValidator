@@ -45,31 +45,31 @@ export class AppService {
 
       switch (entity.entryType) {
         case ENTRY_TYPES.USER:
-          errors.push(this.checkForDuplicated_dns(entity.ldapEntry));
-          errors.push(this.checkForDuplicated_cns(entity.ldapEntry));
-          errors.push(this.checkForDuplicated_uids(entity.ldapEntry));
-          errors.push(this.checkForDuplicated_uidnumbers(entity.ldapEntry));
-          errors.push(this.checkForMissingGroup(entity.ldapEntry));
-          errors.push(this.validationService.checkForHomedirectory(entity.ldapEntry));
+          errors.push(this.checkForDuplicated_dns(entity.ldapEntry, ENTRY_TYPES.USER));
+          errors.push(this.checkForDuplicated_cns(entity.ldapEntry, ENTRY_TYPES.USER));
+          errors.push(this.checkForDuplicated_uids(entity.ldapEntry, ENTRY_TYPES.USER));
+          errors.push(this.checkForDuplicated_uidnumbers(entity.ldapEntry, ENTRY_TYPES.USER));
+          errors.push(this.checkForMissingGroup(entity.ldapEntry, ENTRY_TYPES.GROUP));
+          errors.push(this.validationService.checkForHomedirectory(entity.ldapEntry, ENTRY_TYPES.USER));
           break;
 
         case ENTRY_TYPES.GROUP:
-          errors.push(this.checkForDuplicated_dns(entity.ldapEntry));
-          errors.push(this.checkForDuplicated_gidnumbers(entity.ldapEntry));
-          errors.push(...this.checkGroupsForMissingMemberUids(entity.ldapEntry));
+          errors.push(this.checkForDuplicated_dns(entity.ldapEntry, ENTRY_TYPES.GROUP));
+          errors.push(this.checkForDuplicated_gidnumbers(entity.ldapEntry, ENTRY_TYPES.GROUP));
+          errors.push(...this.checkGroupsForMissingMembers(entity.ldapEntry, ENTRY_TYPES.GROUP));
           break;
 
         case ENTRY_TYPES.GROUP_OF_NAMES:
-          errors.push(this.checkForDuplicated_dns(entity.ldapEntry));
-          // checkGroupsOfNamesForMissingMembers
+          errors.push(this.checkForDuplicated_dns(entity.ldapEntry, ENTRY_TYPES.GROUP_OF_NAMES));
+          errors.push(...this.checkGroupsOfNamesForMissingMembers(entity.ldapEntry, ENTRY_TYPES.GROUP_OF_NAMES));
           break;
 
         case ENTRY_TYPES.ORGANIZATIONAL_UNIT:
-          errors.push(this.checkForDuplicated_dns(entity.ldapEntry));
+          errors.push(this.checkForDuplicated_dns(entity.ldapEntry, ENTRY_TYPES.USER));
           break;
 
         default:
-          errors.push(this.checkForDuplicated_dns(entity.ldapEntry));
+          errors.push(this.checkForDuplicated_dns(entity.ldapEntry, ENTRY_TYPES.USER));
           break;
       }
 
@@ -84,35 +84,38 @@ export class AppService {
       }
     });
   }
-  checkForDuplicated_gidnumbers(ldapEntry: ILDAPEntry): string {
+
+  checkForDuplicated_gidnumbers(ldapEntry: ILDAPEntry, type: ENTRY_TYPES): string {
     return this.validationService.checkForDuplicatedEntriesByPropName(
       ldapEntry,
       this.getEntriesByType(ENTRY_TYPES.GROUP),
-      'gidnumber'
+      'gidnumber',
+      type
     );
   }
 
-  checkForMissingGroup(ldapEntry: ILDAPEntry): string {
+  checkForMissingGroup(ldapEntry: ILDAPEntry, type: ENTRY_TYPES): string {
     return this.validationService.checkIfEntryExistByPropName(
       ldapEntry,
       this.getEntriesByType(ENTRY_TYPES.GROUP),
-      'gidnumber'
+      'gidnumber',
+      type
     );
   }
 
-  checkForDuplicated_uidnumbers(ldapEntry: ILDAPEntry): string {
-    return this.validationService.checkForDuplicatedEntriesByPropName(ldapEntry, this.allEntriesOnly, 'uidnumber');
+  checkForDuplicated_uidnumbers(ldapEntry: ILDAPEntry, type: ENTRY_TYPES): string {
+    return this.validationService.checkForDuplicatedEntriesByPropName(ldapEntry, this.allEntriesOnly, 'uidnumber',type);
   }
 
-  checkForDuplicated_uids(ldapEntry: ILDAPEntry): string {
-    return this.validationService.checkForDuplicatedEntriesByPropName(ldapEntry, this.allEntriesOnly, 'uid');
+  checkForDuplicated_uids(ldapEntry: ILDAPEntry, type: ENTRY_TYPES): string {
+    return this.validationService.checkForDuplicatedEntriesByPropName(ldapEntry, this.allEntriesOnly, 'uid',type);
   }
-  checkForDuplicated_cns(ldapEntry: ILDAPEntry): string {
-    return this.validationService.checkForDuplicatedEntriesByPropName(ldapEntry, this.allEntriesOnly, 'cn');
+  checkForDuplicated_cns(ldapEntry: ILDAPEntry, type: ENTRY_TYPES): string {
+    return this.validationService.checkForDuplicatedEntriesByPropName(ldapEntry, this.allEntriesOnly, 'cn', type);
   }
 
-  checkForDuplicated_dns(entry: ILDAPEntry): string {
-    return this.validationService.checkForDuplicatedEntriesByPropName(entry, this.allEntriesOnly, 'dn');
+  checkForDuplicated_dns(entry: ILDAPEntry, type: ENTRY_TYPES): string {
+    return this.validationService.checkForDuplicatedEntriesByPropName(entry, this.allEntriesOnly, 'dn',type);
   }
 
   getEntriesByType(type: ENTRY_TYPES): ILDAPEntry[] {
@@ -168,14 +171,28 @@ export class AppService {
   ////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////
 
-  checkGroupsForMissingMemberUids(ldapEntry: ILDAPEntry): string[] {
+  checkGroupsForMissingMembers(ldapEntry: ILDAPEntry,type: ENTRY_TYPES): string[] {
     let msg: string[] = [];
     let allUsers = this.getEntriesByType(ENTRY_TYPES.USER);
     let propName = 'uid';
     ldapEntry.memberuids?.forEach((uid) => {
       let user = allUsers.find((u) => u.uid === uid);
       if (!user) {
-        msg.push(`\tmemberuid with [ ${propName} ] = [ ${ldapEntry[propName as keyof ILDAPEntry]} ] wont exists`);
+        msg.push(`\tmemberuid with [ ${propName} ]:[ ${ldapEntry[propName as keyof ILDAPEntry]} ] wont exists`);
+      }
+    });
+
+    return msg;
+  }
+
+  checkGroupsOfNamesForMissingMembers(ldapEntry: ILDAPEntry,type: ENTRY_TYPES) {
+    let msg: string[] = [];
+    let allUsers = this.getEntriesByType(ENTRY_TYPES.USER);
+    let propName = 'dn';
+    ldapEntry.members?.forEach((dn) => {
+      let user = allUsers.find((u) => u.dn === dn);
+      if (!user) {
+        msg.push(`\tmember with [ ${propName} ] = [ ${ldapEntry[propName as keyof ILDAPEntry]} ] wont exists`);
       }
     });
 

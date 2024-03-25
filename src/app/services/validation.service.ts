@@ -24,7 +24,7 @@ export class ValidationService {
       let msgs: string[] = [];
       list.forEach((e) => {
         // msgs.push(`\tduplicated [ ${propName} ] for: ${e[propName as keyof ILDAPEntry]}`);
-        msgs.push(`\tduplicated entry with dn [ ${e.dn} ] >>> [ ${propName} ] = [ ${e[propName as keyof ILDAPEntry]} ]`);
+        msgs.push(`\tduplicated ${type} with dn [ ${e.dn} ] >>> [ ${propName} ] = [ ${e[propName as keyof ILDAPEntry]} ]`);
       });
       return msgs.join('\n');
     }
@@ -32,7 +32,7 @@ export class ValidationService {
     return '';
   }
 
-  checkForHomedirectory(ldapEntry: ILDAPEntry): string {
+  checkForHomedirectory(ldapEntry: ILDAPEntry, type: ENTRY_TYPES): string {
     let path = ldapEntry.homedirectory?.split('/');
     let dirname = path?.slice(path.length - 1).toString();
 
@@ -43,9 +43,9 @@ export class ValidationService {
     return '';
   }
 
-  checkIfEntryExistByPropName(ldapEntry: ILDAPEntry, entries: ILDAPEntry[], propName: string): string {
+  checkIfEntryExistByPropName(ldapEntry: ILDAPEntry, entries: ILDAPEntry[], propName: string, type:ENTRY_TYPES=ENTRY_TYPES.OTHER): string {
     if (!entries.some((g) => g[propName as keyof ILDAPEntry] === ldapEntry[propName as keyof ILDAPEntry])) {
-      return `\tentry with [ ${propName} ] = [ ${ldapEntry[propName as keyof ILDAPEntry]} ] wont exists`;
+      return `\t${type} with [ ${propName} ] = [ ${ldapEntry[propName as keyof ILDAPEntry]} ] wont exists`;
     }
 
     return '';
