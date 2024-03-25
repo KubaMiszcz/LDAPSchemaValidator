@@ -146,9 +146,9 @@ export class AppService {
       if (e.errors?.length) {
         msg = `ERR: for ${e.entryType} with dn: [ ${e.ldapEntry.dn} ]\n`;
         e.errors.forEach((err) => (msg += err + '\n'));
+        this.validationReport += msg + '\n';
       }
 
-      this.validationReport += msg + '\n';
     });
 
     this.entities.forEach((e) => {
@@ -156,9 +156,8 @@ export class AppService {
       if (e.warnings?.length) {
         msg = `ERR: for ${e.entryType} with dn: [ ${e.ldapEntry.dn} ]\n`;
         e.warnings.forEach((err) => (msg += err + '\n'));
+        this.validationReport += msg + '\n';
       }
-
-      this.validationReport += msg + '\n';
     });
   }
 
@@ -178,7 +177,7 @@ export class AppService {
     ldapEntry.memberuids?.forEach((uid) => {
       let user = allUsers.find((u) => u.uid === uid);
       if (!user) {
-        msg.push(`\tmemberuid with [ ${propName} ]:[ ${ldapEntry[propName as keyof ILDAPEntry]} ] wont exists`);
+        msg.push(`\tmemberuid with [ ${propName} ] = [ ${ldapEntry[propName as keyof ILDAPEntry]} ] wont exists`);
       }
     });
 
