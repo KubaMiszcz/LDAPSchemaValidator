@@ -1,4 +1,35 @@
 # LDAPSchemaValidator
+gets exported schema as LDIF format and checks if all is ok, then showc report with points where is some inconsistency/errors
+
+### raw input - exported from LDAP
+- [ ] entries delimited by double newline `\n\n`
+- [ ] entries recognized by contains `dn: `
+
+### it perfroms checks:
+- [ ] for USER:
+  - checkForDuplicated_dns
+  - checkForDuplicated_cns
+  - checkForDuplicated_uids
+  - checkForDuplicated_uidnumbers
+  - checkForMissingGroup
+  - checkForHomedirectory
+- [ ] for GROUP:
+  - checkForDuplicated_dns
+  - checkForDuplicated_gidnumbers
+  - checkGroupsForMissingMembers
+- [ ] for GROUP_OF_NAMES:
+  - checkForDuplicated_dns
+  - checkGroupsOfNamesForMissingMembers
+- [ ] for ORGANIZATIONAL_UNIT:
+  - checkForDuplicated_dns
+- [ ] for the rest:
+  - checkForDuplicated_dns
+
+
+
+
+
+
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.0.3.
 
