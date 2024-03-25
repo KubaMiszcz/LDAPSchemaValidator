@@ -24,8 +24,8 @@ gets exported schema as LDIF format and checks if all is ok, then showc report w
   - checkForDuplicated_dns
 - [ ] for the rest:
   - checkForDuplicated_dns
-SHGPUCIL-------
-SFGPUCIL-------
+
+
 
 
 
