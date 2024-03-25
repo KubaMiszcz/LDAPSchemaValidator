@@ -17,11 +17,6 @@ export interface ILDAPEntry {
   member?: string[];
   memberuid?: string[];
   objectclass?: string[];
-
-  //extract outside
-  typeDEPR?: ENTRY_TYPES;
-  content?: string;
-  errors?: string[];
 }
 
 // export interface ILDAPEntityKEYSVALUES {

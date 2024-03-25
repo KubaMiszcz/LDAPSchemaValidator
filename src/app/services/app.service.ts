@@ -39,70 +39,66 @@ export class AppService {
   }
 
   validateSchema(entities: IEntity[]) {
-    this.entities.forEach((entity) => {
+    entities.forEach((entity) => {
       let errors: string[] = [];
+      let warnings: string[] = [];
+      errors.push(this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'dn'));
 
       switch (entity.entryType) {
         case ENTRY_TYPES.USER:
-          errors.push(
-            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'dn')
-          );
-          errors.push(
-            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'cn')
-          );
-          errors.push(
-            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'uid')
-          );
+          errors.push(this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'cn'));
+
+          errors.push(this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'uid'));
+
           errors.push(
             this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'uidnumber')
           );
+
           errors.push(
-            this.validationService.checkIfGroupExistById(entity.ldapEntry, this.getAllGroups(), 'gidnumber')
+            this.validationService.checkIfEntryExistByPropName(
+              entity.ldapEntry,
+              this.getEntriesByType(ENTRY_TYPES.GROUP),
+              'gidnumber'
+            )
           );
-          errors.push(
-            // this.validationService.checkIfEntryExistByPropName(entity.ldapEntry., this.allEntriesOnly, 'gidnumber')
-          );
-          errors.push(
-            this.validationService.checkHomedirectory(entity.ldapEntry)
-          );
+
+          errors.push(this.validationService.checkHomedirectory(entity.ldapEntry));
+
           break;
 
         case ENTRY_TYPES.GROUP:
-          errors.push(
-            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'dn')
-          );
-          // checkForDuplicatedGroupIds
-          // checkGroupsForMissingMemberUids();
+          errors.push(this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.getEntriesByType(ENTRY_TYPES.GROUP), 'gidnumber'));
+          errors.push(this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.getEntriesByType(ENTRY_TYPES.GROUP), 'gidnumber'));
+          checkGroupsForMissingMemberUids();
+
 
           break;
 
         case ENTRY_TYPES.GROUP_OF_NAMES:
-          errors.push(
-            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'dn')
-          );
           // checkGroupsOfNamesForMissingMembers
           break;
 
         case ENTRY_TYPES.ORGANIZATIONAL_UNIT:
-          errors.push(
-            this.validationService.checkForDuplicatedEntriesByPropName(entity.ldapEntry, this.allEntriesOnly, 'dn')
-          );
           break;
 
         default:
           break;
       }
 
-      errors=errors.filter(e=>!!e.length);
-
+      errors = errors.filter((e) => !!e.length);
       if (errors.length > 0) {
         entity.errors = errors;
+      }
+      
+      warnings = warnings.filter((e) => !!e.length);
+      if (warnings.length > 0) {
+        entity.warnings = warnings;
       }
     });
   }
 
-  getAllGroups(): ILDAPEntry[] {
-    return this.entities.filter((e) => e.entryType === ENTRY_TYPES.GROUP).map((e) => e.ldapEntry);
+  getEntriesByType(type: ENTRY_TYPES): ILDAPEntry[] {
+    return this.entities.filter((e) => e.entryType === type).map((e) => e.ldapEntry);
   }
 
   importEntities(ldifSchemaRawInput: string): IEntity[] {
@@ -121,14 +117,26 @@ export class AppService {
   }
 
   generateReport() {
-    this.validationReport = '';
-    let msg = '';
-    this.entities.forEach((e) => {
-      if (e.errors?.length) {
-        msg = `ERR: for dn:\n${e.ldapEntry.dn}\n`;
-        e.errors.forEach((err) => (msg += err +'\n'));
-      }
+let err = this.entities.filter((e) => e.errors?.length??0 > 0);
 
+    this.validationReport = '';
+    this.entities.forEach((e) => {
+      let msg = '';
+      if (e.errors?.length) {
+        msg = `ERR: for ${e.entryType} with dn: [ ${e.ldapEntry.dn} ]\n`;
+        e.errors.forEach((err) => (msg += err + '\n'));
+      }
+      
+      this.validationReport += msg + '\n';
+    });
+
+    this.entities.forEach((e) => {
+      let msg = '';
+      if (e.warnings?.length) {
+        msg = `ERR: for ${e.entryType} with dn: [ ${e.ldapEntry.dn} ]\n`;
+        e.warnings.forEach((err) => (msg += err + '\n'));
+      }
+      
       this.validationReport += msg + '\n';
     });
   }

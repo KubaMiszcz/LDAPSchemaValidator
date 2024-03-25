@@ -17,7 +17,8 @@ export class ValidationService {
     if (list.length > 1) {
       let msgs: string[] = [];
       list.forEach((e) => {
-        msgs.push(`\tduplicated [ ${propName} ] for: ${e[propName as keyof ILDAPEntry]}`);
+        // msgs.push(`\tduplicated [ ${propName} ] for: ${e[propName as keyof ILDAPEntry]}`);
+        msgs.push(`\tduplicated [ ${propName} = ${e[propName as keyof ILDAPEntry]} ] for: [ ${e.dn} ]`);
       });
       return msgs.join('\n');
     }
@@ -36,9 +37,18 @@ export class ValidationService {
     return '';
   }
 
-  checkIfGroupExistById(ldapEntry: ILDAPEntry, allGroups: ILDAPEntry[], propName: string): string {
-    if (allGroups.some((g) => g.gidnumber === ldapEntry.gidnumber)) {
-      return `\tgroup with [ ${propName} ] = [ ${ldapEntry.gidnumber} ] wont exists`;
+  //kmm
+  // checkIfGroupExistById(ldapEntry: ILDAPEntry, allGroups: ILDAPEntry[], propName: string): string {
+  //   if (allGroups.some((g) => g.gidnumber === ldapEntry.gidnumber)) {
+  //     return `\tgroup with [ ${propName} ] = [ ${ldapEntry.gidnumber} ] wont exists`;
+  //   }
+
+  //   return '';
+  // }
+
+  checkIfEntryExistByPropName(ldapEntry: ILDAPEntry, entries: ILDAPEntry[], propName: string): string {
+    if (!entries.some((g) => g[propName as keyof ILDAPEntry] === ldapEntry[propName as keyof ILDAPEntry])) {
+      return `\tentry with [ ${propName} ] = [ ${ldapEntry[propName as keyof ILDAPEntry]} ] wont exists`;
     }
 
     return '';
