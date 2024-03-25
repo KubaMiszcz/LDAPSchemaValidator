@@ -1,11 +1,5 @@
 # LDAPSchemaValidator
-gets exported schema in LDIF format like in example and checks if all is ok, 
-then shows report with points where is some inconsistency/errors
-
-### compatibility
-- [ ] [phpLDAPadmin](https://github.com/leenooks/phpLDAPadmin/wiki)
-- [ ] [LDAP Account Manager](https://www.ldap-account-manager.org/lamcms/)
-
+gets exported schema as LDIF format and checks if all is ok, then showc report with points where is some inconsistency/errors
 
 ### raw input - exported from LDAP
 - [ ] entries delimited by double newline `\n\n`
@@ -30,7 +24,8 @@ then shows report with points where is some inconsistency/errors
   - checkForDuplicated_dns
 - [ ] for the rest:
   - checkForDuplicated_dns
-
+SHGPUCIL-------
+SFGPUCIL-------
 
 
 
