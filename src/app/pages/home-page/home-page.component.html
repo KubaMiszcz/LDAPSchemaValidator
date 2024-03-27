@@ -1,8 +1,14 @@
 <div class="d-flsex justify-content-center">
+    <p>Export schema as LDIF, entry started with 'dn: ', further info here:
+        <a href="https://github.com/KubaMiszcz/LDAPSchemaValidator">Help</a>
+    </p>
+
+</div>
+<div class="d-flsex justify-content-center">
     <div class="form-group m-3">
         <label for="exampleFormControlInput1" class="form-label">input: exported LDIF file</label>
-        <textarea [(ngModel)]="ldifSchemaRawInput" aria-label="asads" class="form-control" name="asd" id="text2" rows="10"
-            placeholder="values"></textarea>
+        <textarea [(ngModel)]="ldifSchemaRawInput" aria-label="asads" class="form-control small-text-75" name="asd"
+            id="text2" rows="10" placeholder="values"></textarea>
     </div>
 </div>
 
@@ -16,42 +22,10 @@
 
 
 
-
-
-
-
-
-
-<div class="d-flex justify-content-center">
-    <!-- <div class="col-5 form-group me-4 mb-3 ">
-        <label for="exampleFormControlTextarea1">Example textarea</label>
-        <textarea [(ngModel)]="template" aria-label="asads" class="form-control" name="asd" id="text1" rows="15"
-            placeholder="tekst"></textarea>
-    </div> -->
-
-    <!-- <div *ngFor="let item of keysWithValues; index as idx" class="form-group me-3 mb-3">
-        <label for="exampleFormControlInput1">Key {{idx+1}}</label>
-        <input type="text" class="form-control mb-2" id="exampleFormControlInput21" placeholder="key" [value]="item.key" readonly disabled>
-        <label for="exampleFormControlInput1" class="form-label">Values for Key {{idx+1}}</label>
-        <textarea aria-label="asads" class="form-control" name="asd" id="text2" rows="15"
-            placeholder="values" readonly disabled [value]="item.values"></textarea>
-    </div> -->
-
-
-    <!-- <div class="form-group me-3 mb-3">
-        <button type="button" name="" id="" class="btn btn-primary"
-            style="height: -webkit-fill-available; width: 2rem;" (click)="addKey()">
-            +
-        </button>
-    </div> -->
-</div>
-
-
-
 <div class="d-flsex justify-content-center">
     <div class="form-group m-3">
         <label for="exampleFormControlInput1" class="form-label">validationResults</label>
-        <textarea [(ngModel)]="validationResults" aria-label="asads" class="form-control generated-output" name="asd" id="text1" rows="15"
-            placeholder="tekst"></textarea>
+        <textarea [(ngModel)]="validationResults" aria-label="asads" class="form-control small-text-75" name="asd"
+            id="text1" rows="15" placeholder="tekst"></textarea>
     </div>
 </div>
