@@ -31,7 +31,7 @@ export class AppService {
 
     this.validateSchema(this.entities);
 
-    this.generateReport();
+  this.validationReport = this.generateReport();
   }
 
   validateSchema(entities: IEntity[]) {
@@ -134,15 +134,13 @@ export class AppService {
   }
 
   generateReport() {
-    let err = this.entities.filter((e) => e.errors?.length ?? 0 > 0);
-
-    this.validationReport = '';
+    let result = '';
     this.entities.forEach((e) => {
       let msg = '';
       if (e.errors?.length) {
         msg = `ERR: for ${e.entryType} with dn: [ ${e.ldapEntry.dn} ]\n`;
         e.errors.forEach((err) => (msg += err + '\n'));
-        this.validationReport += msg + '\n';
+        result += msg + '\n';
       }
 
     });
@@ -152,9 +150,11 @@ export class AppService {
       if (e.warnings?.length) {
         msg = `ERR: for ${e.entryType} with dn: [ ${e.ldapEntry.dn} ]\n`;
         e.warnings.forEach((err) => (msg += err + '\n'));
-        this.validationReport += msg + '\n';
+        result += msg + '\n';
       }
     });
+
+    return result.length>0?result:'looks like all is OK with this schema';
   }
 
   checkGroupsForMissingMembers(ldapEntry: ILDAPEntry,type: ENTRY_TYPES): string[] {
